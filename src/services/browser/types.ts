@@ -3,5 +3,5 @@ export interface PCRStats {
     folderPath: string;
     revision: string;
     product: string;
-    puppeteer: any;
+    puppeteer: any; // Required by BrowserSession
 } 

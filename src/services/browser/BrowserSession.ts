@@ -32,11 +32,12 @@ export class BrowserSession {
 		this.context = context
 	}
 
-	public static getInstance(context: vscode.ExtensionContext): BrowserSession {
+	public static getInstance(context: vscode.ExtensionContext | { context: vscode.ExtensionContext }): BrowserSession {
 		if (!BrowserSession.instance) {
-			BrowserSession.instance = new BrowserSession(context)
+			const extensionContext = 'context' in context ? context.context : context;
+			BrowserSession.instance = new BrowserSession(extensionContext);
 		}
-		return BrowserSession.instance
+		return BrowserSession.instance;
 	}
 
 	public async initialize(): Promise<void> {

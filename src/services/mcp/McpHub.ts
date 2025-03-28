@@ -516,10 +516,11 @@ export class McpHub {
 				server: {
 					name,
 					config: JSON.stringify(config),
-					status: "connecting",
+					status: "connecting" as const,
 					disabled: config.disabled,
 					source,
 					projectPath: source === "project" ? vscode.workspace.workspaceFolders?.[0]?.uri.fsPath : undefined,
+					type: config.type || "stdio" as const,
 				},
 				client,
 				transport,

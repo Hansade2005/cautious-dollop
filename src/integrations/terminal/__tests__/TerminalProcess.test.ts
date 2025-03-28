@@ -313,6 +313,15 @@ describe("TerminalProcess", () => {
 			expect(terminalProcess.getLastRetrievedIndex()).toBe(5)
 			expect(terminalProcess.getFullOutput()).toEqual([])
 		})
+
+		it("should handle exit code interpretation", () => {
+			const exitDetails = TerminalProcess.interpretExitCode(0)
+			expect(exitDetails).toEqual({
+				exitCode: 0,
+				signalName: undefined,
+				coreDumpPossible: undefined
+			})
+		})
 	})
 
 	describe("exit code interpretation", () => {
