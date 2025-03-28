@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "moduleResolution": "Node16",
+    "module": "Node16",
+    "target": "ES2021",
+    "lib": ["ES2021"],
+    "esModuleInterop": true,
+    "allowJs": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["../../../node_modules/*"]
+    },
+    "typeRoots": [
+      "../../../node_modules/@types",
+      "../../../@types"
+    ]
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "**/__tests__/*"]
+}

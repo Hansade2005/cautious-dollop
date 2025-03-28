@@ -8,9 +8,12 @@ export type ToolGroupConfig = {
 
 // Map of tool slugs to their display names
 export const TOOL_DISPLAY_NAMES = {
-	execute_command: "run commands",
-	read_file: "read files",
-	fetch_instructions: "fetch instructions",
+execute_command: "run commands",
+read_file: "read files",
+generate_tests: "generate unit tests",
+web_search: "search the web",
+fetch_instructions: "fetch instructions",
+example_tool: "example tool",
 	write_to_file: "write files",
 	apply_diff: "apply changes",
 	search_files: "search files",
@@ -29,9 +32,9 @@ export type { ToolGroup }
 
 // Define available tool groups
 export const TOOL_GROUPS: Record<ToolGroup, ToolGroupConfig> = {
-	read: {
-		tools: ["read_file", "fetch_instructions", "search_files", "list_files", "list_code_definition_names"],
-	},
+read: {
+tools: ["read_file", "fetch_instructions", "search_files", "list_files", "list_code_definition_names", "example_tool", "web_search", "generate_tests"],
+},
 	edit: {
 		tools: ["apply_diff", "write_to_file", "insert_content", "search_and_replace"],
 	},

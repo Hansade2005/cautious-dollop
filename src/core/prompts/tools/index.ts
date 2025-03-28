@@ -1,5 +1,8 @@
 import { getExecuteCommandDescription } from "./execute-command"
 import { getReadFileDescription } from "./read-file"
+import { getExampleToolDescription } from "./example-tool"
+import { getWebSearchDescription, handleWebSearch } from "./web-search"
+import { getGenerateTestsDescription, handleGenerateTests } from "./generate-tests"
 import { getFetchInstructionsDescription } from "./fetch-instructions"
 import { getWriteToFileDescription } from "./write-to-file"
 import { getSearchFilesDescription } from "./search-files"
@@ -22,8 +25,11 @@ import { ToolArgs } from "./types"
 
 // Map of tool names to their description functions
 const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined> = {
-	execute_command: (args) => getExecuteCommandDescription(args),
-	read_file: (args) => getReadFileDescription(args),
+execute_command: (args) => getExecuteCommandDescription(args),
+read_file: (args) => getReadFileDescription(args),
+example_tool: (args) => getExampleToolDescription(args),
+web_search: (args) => getWebSearchDescription(args),
+generate_tests: (args) => getGenerateTestsDescription(args),
 	fetch_instructions: () => getFetchInstructionsDescription(),
 	write_to_file: (args) => getWriteToFileDescription(args),
 	search_files: (args) => getSearchFilesDescription(args),
@@ -64,7 +70,7 @@ export function getToolDescriptionsForMode(
 	const tools = new Set<string>()
 
 	// Add tools from mode's groups
-	config.groups.forEach((groupEntry) => {
+	config.groups.forEach((groupEntry: string | [string, any]) => {
 		const groupName = getGroupName(groupEntry)
 		const toolGroup = TOOL_GROUPS[groupName]
 		if (toolGroup) {
@@ -97,8 +103,13 @@ export function getToolDescriptionsForMode(
 
 // Export individual description functions for backward compatibility
 export {
-	getExecuteCommandDescription,
-	getReadFileDescription,
+getExecuteCommandDescription,
+getReadFileDescription,
+getExampleToolDescription,
+getWebSearchDescription,
+handleWebSearch,
+getGenerateTestsDescription,
+handleGenerateTests,
 	getFetchInstructionsDescription,
 	getWriteToFileDescription,
 	getSearchFilesDescription,

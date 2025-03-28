@@ -149,6 +149,15 @@
 	}
 }
 
+@font-face {
+	font-family: 'Fira Code';
+	src: url('https://cdn.jsdelivr.net/gh/tonsky/FiraCode@5.2/distr/woff2/FiraCode-Regular.woff2') format('woff2'),
+		url('https://cdn.jsdelivr.net/gh/tonsky/FiraCode@5.2/distr/woff/FiraCode-Regular.woff') format('woff');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
 @layer components {
 	/* Border Styles */
 	.border,
@@ -165,6 +174,15 @@
 	pre,
 	code {
 		background-color: var(--vscode-textCodeBlock-background);
+		font-family: 'Fira Code', monospace;
+		font-feature-settings: 'calt' 1;
+		letter-spacing: -0.5px;
+	}
+
+	.code-block {
+		font-family: 'Fira Code', monospace;
+		font-feature-settings: 'calt' 1;
+		letter-spacing: -0.5px;
 	}
 }
 
