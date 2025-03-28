@@ -206,6 +206,7 @@ describe("McpHub", () => {
 						config: "{}",
 						status: "connected",
 						disabled: false,
+						type: "stdio" as const,
 					},
 					client: {} as any,
 					transport: {} as any,
@@ -216,6 +217,7 @@ describe("McpHub", () => {
 						config: "{}",
 						status: "connected",
 						disabled: true,
+						type: "stdio" as const,
 					},
 					client: {} as any,
 					transport: {} as any,
@@ -236,6 +238,7 @@ describe("McpHub", () => {
 					config: "{}",
 					status: "connected",
 					disabled: true,
+					type: "stdio" as const,
 				},
 				client: {
 					request: jest.fn().mockResolvedValue({ result: "success" }),
@@ -257,6 +260,7 @@ describe("McpHub", () => {
 					config: "{}",
 					status: "connected",
 					disabled: true,
+					type: "stdio" as const,
 				},
 				client: {
 					request: jest.fn(),
@@ -280,6 +284,7 @@ describe("McpHub", () => {
 					name: "test-server",
 					config: JSON.stringify({}),
 					status: "connected" as const,
+					type: "stdio" as const,
 				},
 				client: {
 					request: jest.fn().mockResolvedValue({ result: "success" }),
@@ -343,6 +348,7 @@ describe("McpHub", () => {
 						name: "test-server",
 						config: JSON.stringify({ type: "stdio", command: "test" }), // No timeout specified
 						status: "connected",
+						type: "stdio" as const,
 					},
 					client: {
 						request: jest.fn().mockResolvedValue({ content: [] }),
@@ -366,6 +372,7 @@ describe("McpHub", () => {
 						name: "test-server",
 						config: JSON.stringify({ type: "stdio", command: "test", timeout: 120 }), // 2 minutes
 						status: "connected",
+						type: "stdio" as const,
 					},
 					client: {
 						request: jest.fn().mockResolvedValue({ content: [] }),
@@ -440,6 +447,7 @@ describe("McpHub", () => {
 							timeout: 3601, // Invalid timeout
 						}),
 						status: "connected",
+						type: "stdio" as const,
 					},
 					client: {
 						request: jest.fn().mockResolvedValue({ content: [] }),

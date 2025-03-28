@@ -49,7 +49,7 @@ export class TerminalRegistry {
 					const terminalInfo = this.getTerminalByVSCETerminal(e.terminal)
 					const process = terminalInfo?.process
 
-					const exitDetails = TerminalProcess.interpretExitCode(e?.exitCode)
+					const exitDetails = TerminalProcess.interpretExitCode(e?.exitCode ?? 0)
 
 					console.info("[TerminalRegistry] Shell execution ended:", {
 						hasExecution: !!e?.execution,

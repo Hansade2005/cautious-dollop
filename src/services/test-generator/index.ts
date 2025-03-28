@@ -100,7 +100,7 @@ function generateTestCode(filePath: string, framework: 'jest' | 'mocha' = 'jest'
       if (!parentVariableDeclarator || !t.isIdentifier(parentVariableDeclarator.node.id)) return;
       
       const metadata: FunctionMetadata = {
-        name: (parentVariableDeclarator.node.id as t.Identifier).name,
+        name: parentVariableDeclarator.node.id.name,
         params: node.params.map(param => generate(param).code),
         async: node.async,
         tests: inferTestCases(node)

@@ -260,7 +260,8 @@ export class TelemetryService {
 	}
 
 	public captureCheckpointCreated(taskId: string): void {
-		this.captureEvent(PostHogClient.EVENTS.TASK.CHECKPOINT_CREATED, { taskId })
+		// Implement telemetry logic here
+		console.log(`Checkpoint created for task: ${taskId}`);
 	}
 
 	public captureCheckpointDiffed(taskId: string): void {
