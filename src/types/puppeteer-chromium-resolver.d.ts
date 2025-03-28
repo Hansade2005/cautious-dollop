@@ -1,18 +1,20 @@
 declare module 'puppeteer-chromium-resolver' {
-  interface ResolverOptions {
-    cache?: string;
-    revision?: string;
-    downloadHost?: string;
-    downloadPath?: string;
-  }
+  import { Browser, launch } from 'puppeteer-core';
 
   interface ResolverResult {
     executablePath: string;
-    revision: string;
     folderPath: string;
+    revision: string;
     product: string;
+    puppeteer: {
+      launch: typeof launch;
+    };
   }
 
-  function resolve(options?: ResolverOptions): Promise<ResolverResult>;
-  export = resolve;
+  interface ResolverOptions {
+    downloadPath?: string;
+  }
+
+  function PCR(options?: ResolverOptions): Promise<ResolverResult>;
+  export = PCR;
 } 

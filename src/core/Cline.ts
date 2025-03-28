@@ -4294,6 +4294,47 @@ export class Cline extends EventEmitter<ClineEvents> {
 			this.enableCheckpoints = false
 		}
 	}
+
+	private handleUnknownError(error: unknown): Error {
+		if (error instanceof Error) {
+			return error;
+		}
+		return new Error(String(error));
+	}
+
+	private logError(error: unknown): void {
+		if (error instanceof Error) {
+			this.log(`Error: ${error.message}`);
+			this.log(`Stack: ${error.stack}`);
+			this.log(`Name: ${error.name}`);
+			this.log(`Cause: ${error.cause}`);
+		} else {
+			this.log(`Unknown error: ${String(error)}`);
+		}
+	}
+
+	// Update error handling in catch blocks
+	try {
+		// ... existing code ...
+	} catch (error) {
+		this.logError(error);
+		throw this.handleUnknownError(error);
+	}
+
+	// ... existing code ...
+	try {
+		// ... existing code ...
+	} catch (error) {
+		throw this.handleUnknownError(error);
+	}
+
+	// ... existing code ...
+	try {
+		// ... existing code ...
+	} catch (error) {
+		this.handleError(this.handleUnknownError(error));
+	}
+	// ... existing code ...
 }
 
 function escapeRegExp(string: string): string {
