@@ -105,6 +105,7 @@ export class ClineProvider extends EventEmitter<ClineProviderEvents> implements 
 	private contextProxy: ContextProxy
 	public readonly providerSettingsManager: ProviderSettingsManager
 	public readonly customModesManager: CustomModesManager
+	private browserSession?: BrowserSession
 
 	constructor(
 		readonly context: vscode.ExtensionContext,
@@ -137,6 +138,9 @@ export class ClineProvider extends EventEmitter<ClineProviderEvents> implements 
 			.catch((error) => {
 				this.outputChannel.appendLine(`Failed to initialize MCP Hub: ${error}`)
 			})
+
+		// Replace direct constructor calls with getInstance
+		this.browserSession = BrowserSession.getInstance(this);
 	}
 
 	// Adds a new Cline instance to clineStack, marking the start of a new task.
@@ -1421,7 +1425,7 @@ export class ClineProvider extends EventEmitter<ClineProviderEvents> implements 
 						break
 					case "testBrowserConnection":
 						try {
-							const browserSession = new BrowserSession(this.context)
+							const browserSession = BrowserSession.getInstance(this.context);
 							// If no text is provided, try auto-discovery
 							if (!message.text) {
 								try {
@@ -1475,20 +1479,20 @@ export class ClineProvider extends EventEmitter<ClineProviderEvents> implements 
 							const discoveredHost = await discoverChromeInstances()
 
 							if (discoveredHost) {
+								const browserSession = BrowserSession.getInstance(this.context);
 								// Don't update the remoteBrowserHost state when auto-discovering
 								// This way we don't override the user's preference
 
 								// Test the connection to get the endpoint
-								const browserSession = new BrowserSession(this.context)
 								const result = await browserSession.testConnection(discoveredHost)
 
 								// Send the result back to the webview
-								await this.postMessageToWebview({
-									type: "browserConnectionResult",
-									success: true,
-									text: `Successfully discovered and connected to Chrome at ${discoveredHost}`,
-									values: { endpoint: result.endpoint },
-								})
+									await this.postMessageToWebview({
+										type: "browserConnectionResult",
+										success: true,
+										text: `Successfully discovered and connected to Chrome at ${discoveredHost}`,
+										values: { endpoint: result.endpoint },
+									})
 							} else {
 								await this.postMessageToWebview({
 									type: "browserConnectionResult",

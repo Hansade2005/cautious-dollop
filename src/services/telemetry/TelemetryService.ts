@@ -143,10 +143,20 @@ class PostHogClient {
  * TelemetryService wrapper class that defers PostHogClient initialization
  * This ensures that we only create the PostHogClient after environment variables are loaded
  */
-class TelemetryService {
+export class TelemetryService {
+	private static instance: TelemetryService
 	private client: PostHogClient | null = null
 	private initialized = false
 	private providerRef: WeakRef<ClineProviderInterface> | null = null
+
+	private constructor() {}
+
+	public static getInstance(): TelemetryService {
+		if (!TelemetryService.instance) {
+			TelemetryService.instance = new TelemetryService()
+		}
+		return TelemetryService.instance
+	}
 
 	/**
 	 * Initialize the telemetry service with the PostHog client
@@ -280,4 +290,4 @@ class TelemetryService {
 }
 
 // Export a singleton instance of the telemetry service wrapper
-export const telemetryService = new TelemetryService()
+export const telemetryService = TelemetryService.getInstance()

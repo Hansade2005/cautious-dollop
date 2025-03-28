@@ -34,17 +34,16 @@ export interface TerminalProcessResultPromise extends Promise<void> {
 }
 
 export class TerminalProcess extends EventEmitter {
-  // Add strongly typed event methods
-  public override emit<K extends keyof TerminalEvents>(event: K | string, ...args: any[]): boolean {
-    return super.emit(event, ...args);
+  public override emit(event: string | symbol | keyof TerminalEvents, ...args: any[]): boolean {
+    return super.emit(event as string, ...args);
   }
 
-  public override on<K extends keyof TerminalEvents>(event: K | string, listener: (...args: any[]) => void): this {
-    return super.on(event, listener);
+  public override on(event: string | symbol | keyof TerminalEvents, listener: (...args: any[]) => void): this {
+    return super.on(event as string, listener);
   }
 
-  public override once<K extends keyof TerminalEvents>(event: K | string, listener: (...args: any[]) => void): this {
-    return super.once(event, listener);
+  public override once(event: string | symbol | keyof TerminalEvents, listener: (...args: any[]) => void): this {
+    return super.once(event as string, listener);
   }
 
   // Static methods
