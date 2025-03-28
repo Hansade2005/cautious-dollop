@@ -28,44 +28,104 @@ jobs:
     
     - name: Install dependencies
       run: |
-        npm install -g vsce
+        npm install -g vsce npm-run-all rimraf mkdirp
         npm run install:all
         
     - name: Setup tree-sitter
       run: |
         mkdir -p dist
-        cp node_modules/web-tree-sitter/tree-sitter.wasm dist/
+        if [ -f "node_modules/web-tree-sitter/tree-sitter.wasm" ]; then
+          cp node_modules/web-tree-sitter/tree-sitter.wasm dist/
+        else
+          echo "Warning: tree-sitter.wasm not found"
+        fi
     
-    - name: Build VSIX (skip all type checking)
+    - name: Prepare build environment
       run: |
-        # Temporarily modify package.json to skip all type checking and linting
-        npm pkg delete scripts.check-types
-        npm pkg delete scripts.lint
-        npm pkg delete scripts.check-types:*
-        npm pkg delete scripts.lint:*
+        rimraf bin dist out
+        mkdir -p bin dist
+        
+        if [ ! -d "webview-ui" ]; then
+          echo "Error: webview-ui directory not found"
+          exit 1
+        fi
+    
+    - name: Create Vite config
+      run: |
+        cat > webview-ui/vite.config.ts << 'EOF'
+        import { defineConfig } from 'vite';
+        import react from '@vitejs/plugin-react';
+
+        export default defineConfig({
+          plugins: [react()],
+          build: {
+            outDir: 'build',
+            rollupOptions: {
+              external: ['path', 'fs/promises'],
+              output: {
+                manualChunks: {
+                  vendor: ['react', 'react-dom']
+                }
+              }
+            }
+          }
+        });
+        EOF
+    
+    - name: Build VSIX
+      run: |
+        # Skip type checking and linting
+        npm pkg delete scripts.check-types scripts.lint scripts.check-types:* scripts.lint:*
         npm pkg set scripts.package="npm-run-all -p build:webview build:esbuild"
         npm pkg set scripts.build:webview="cd webview-ui && npm run build:skip-types"
         npm pkg set scripts.build:esbuild="node esbuild.js --production"
-        # Create a skip-types script in webview-ui
-        cd webview-ui && npm pkg set scripts.build:skip-types="vite build" && cd ..
+        
+        # Setup webview build
+        if [ -d "webview-ui" ]; then
+          cd webview-ui
+          # Create a utility function to handle paths in browser
+          echo 'export const basename = (path) => path.split("/").pop();' > src/utils/path-utils.ts
+          # Update context-mentions.ts to use the new utility
+          sed -i 's/import { basename } from "path"/import { basename } from ".\/path-utils"/' src/utils/context-mentions.ts
+          npm pkg set scripts.build:skip-types="vite build"
+          cd ..
+        fi
+        
+        # Build and package
+        echo "Building extension..."
         npm run build
+        echo "Packaging VSIX..."
+        vsce package --out bin/
     
-    - name: Get version from package.json
-      id: get_version
-      run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/v')
-      with:
-        name: Release ${{ steps.get_version.outputs.VERSION }}
-        files: |
-          bin/roo-cline-*.vsix
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+    - name: Verify VSIX artifact
+      id: verify
+      run: |
+        echo "Checking bin directory contents:"
+        ls -la bin/
+        
+        VSIX_COUNT=$(ls -1 bin/*.vsix 2>/dev/null | wc -l)
+        if [ "$VSIX_COUNT" -eq "0" ]; then
+          echo "Error: No VSIX file found in bin directory"
+          exit 1
+        fi
+        echo "Found $VSIX_COUNT VSIX file(s)"
+        
+        # Set VSIX path for use in release step
+        VSIX_PATH=$(ls bin/*.vsix | head -n 1)
+        echo "vsix_path=$VSIX_PATH" >> $GITHUB_OUTPUT
+    
     - name: Upload VSIX as artifact
       uses: actions/upload-artifact@v4
       with:
         name: vsix-package
-        path: bin/roo-cline-*.vsix
+        path: ${{ steps.verify.outputs.vsix_path }}
+        if-no-files-found: error
+
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Release ${{ github.ref_name }}
+        files: ${{ steps.verify.outputs.vsix_path }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
