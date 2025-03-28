@@ -199,13 +199,13 @@ describe("TerminalProcess", () => {
 
 	describe("getUnretrievedOutput", () => {
 		it("returns and clears unretrieved output", () => {
-			terminalProcess["fullOutput"] = `\x1b]633;C\x07previous\nnew output\x1b]633;D\x07`
+			terminalProcess["fullOutput"] = [`\x1b]633;C\x07previous\nnew output\x1b]633;D\x07`]
 			terminalProcess["lastRetrievedIndex"] = 17 // After "previous\n"
 
 			const unretrieved = terminalProcess.getUnretrievedOutput()
 			expect(unretrieved).toBe("new output")
 
-			expect(terminalProcess["lastRetrievedIndex"]).toBe(terminalProcess["fullOutput"].length - "previous".length)
+			expect(terminalProcess["lastRetrievedIndex"]).toBe(terminalProcess["fullOutput"][0].length - "previous".length)
 		})
 	})
 

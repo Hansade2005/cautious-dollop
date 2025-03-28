@@ -11,6 +11,16 @@ import { fileExistsAtPath } from "../../utils/fs"
 import { BrowserActionResult } from "../../shared/ExtensionMessage"
 import { discoverChromeInstances, testBrowserConnection } from "./browserDiscovery"
 
+interface PCRResolverResult {
+	executablePath: string;
+	folderPath: string;
+	revision: string;
+	product: string;
+	puppeteer: {
+		launch: typeof launch;
+	};
+}
+
 interface PCRStats {
 	executablePath: string;
 	folderPath: string;
@@ -45,7 +55,7 @@ export class BrowserSession {
 
 	public async initialize(): Promise<void> {
 		if (!this.browser) {
-			const stats = await PCR()
+			const stats = await PCR() as PCRResolverResult
 			this.stats = {
 				executablePath: stats.executablePath,
 				folderPath: stats.folderPath,
@@ -76,13 +86,17 @@ export class BrowserSession {
 			await fs.mkdir(puppeteerDir, { recursive: true })
 		}
 
-		// if chromium doesn't exist, this will download it to path.join(puppeteerDir, ".chromium-browser-snapshots")
-		// if it does exist it will return the path to existing chromium
-		const stats: PCRStats = await PCR({
+		const resolverResult = await PCR({
 			downloadPath: puppeteerDir,
 		})
 
-		return stats
+		return {
+			executablePath: resolverResult.executablePath,
+			folderPath: resolverResult.folderPath,
+			revision: resolverResult.revision,
+			product: resolverResult.product,
+			puppeteer: { launch: resolverResult.puppeteer.launch },
+		}
 	}
 
 	async launchBrowser(): Promise<void> {

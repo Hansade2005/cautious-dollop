@@ -8,6 +8,16 @@ import TurndownService from "turndown"
 import PCR from "puppeteer-chromium-resolver"
 import { fileExistsAtPath } from "../../utils/fs"
 
+interface PCRResolverResult {
+	executablePath: string;
+	folderPath: string;
+	revision: string;
+	product: string;
+	puppeteer: {
+		launch: typeof launch;
+	};
+}
+
 interface PCRStats {
 	executablePath: string;
 	folderPath: string;
@@ -37,12 +47,18 @@ export class UrlContentFetcher {
 		if (!dirExists) {
 			await fs.mkdir(puppeteerDir, { recursive: true })
 		}
-		// if chromium doesn't exist, this will download it to path.join(puppeteerDir, ".chromium-browser-snapshots")
-		// if it does exist it will return the path to existing chromium
-		const stats: PCRStats = await PCR({
+
+		const resolverResult = await PCR({
 			downloadPath: puppeteerDir,
-		})
-		return stats
+		}) as PCRResolverResult
+
+		return {
+			executablePath: resolverResult.executablePath,
+			folderPath: resolverResult.folderPath,
+			revision: resolverResult.revision,
+			product: resolverResult.product,
+			puppeteer: { launch: resolverResult.puppeteer.launch },
+		}
 	}
 
 	async launchBrowser(): Promise<void> {
