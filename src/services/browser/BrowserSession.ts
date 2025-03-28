@@ -55,7 +55,7 @@ export class BrowserSession {
 
 	public async initialize(): Promise<void> {
 		if (!this.browser) {
-			const stats = await PCR() as PCRResolverResult
+			const stats = await PCR() as unknown as PCRResolverResult
 			this.stats = {
 				executablePath: stats.executablePath,
 				folderPath: stats.folderPath,
@@ -88,7 +88,7 @@ export class BrowserSession {
 
 		const resolverResult = await PCR({
 			downloadPath: puppeteerDir,
-		})
+		}) as unknown as PCRResolverResult
 
 		return {
 			executablePath: resolverResult.executablePath,

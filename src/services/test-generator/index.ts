@@ -4,7 +4,7 @@ import generate from '@babel/generator';
 import * as t from '@babel/types';
 import { readFileSync } from 'fs';
 import * as path from 'path';
-import { Node, ArrowFunctionExpression, FunctionDeclaration } from '@babel/types';
+import { Node, ArrowFunctionExpression, FunctionDeclaration, Identifier, VariableDeclarator } from '@babel/types';
 
 interface TestCase {
   name: string;
@@ -83,11 +83,11 @@ function generateTestCode(filePath: string, framework: 'jest' | 'mocha' = 'jest'
   traverse(ast, {
     ArrowFunctionExpression(path) {
       const node = path.node as t.ArrowFunctionExpression;
-      const parentVariableDeclarator = path.findParent(p => p.isVariableDeclarator());
+      const parentVariableDeclarator = path.findParent(p => p.isVariableDeclarator()) as traverse.NodePath<VariableDeclarator>;
       if (!parentVariableDeclarator || !t.isIdentifier(parentVariableDeclarator.node.id)) return;
       
       const metadata: FunctionMetadata = {
-        name: parentVariableDeclarator.node.id.name,
+        name: (parentVariableDeclarator.node.id as Identifier).name,
         params: node.params.map(param => generate(param).code),
         async: node.async,
         tests: inferTestCases(node)

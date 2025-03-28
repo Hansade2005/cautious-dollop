@@ -50,7 +50,7 @@ export class UrlContentFetcher {
 
 		const resolverResult = await PCR({
 			downloadPath: puppeteerDir,
-		}) as PCRResolverResult
+		}) as unknown as PCRResolverResult
 
 		return {
 			executablePath: resolverResult.executablePath,
