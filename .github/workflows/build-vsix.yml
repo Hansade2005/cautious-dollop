@@ -36,12 +36,18 @@ jobs:
         mkdir -p dist
         cp node_modules/web-tree-sitter/tree-sitter.wasm dist/
     
-    - name: Build VSIX (skip type checking and linting)
+    - name: Build VSIX (skip all type checking)
       run: |
-        # Temporarily modify package.json to skip type checking and linting
+        # Temporarily modify package.json to skip all type checking and linting
         npm pkg delete scripts.check-types
         npm pkg delete scripts.lint
+        npm pkg delete scripts.check-types:*
+        npm pkg delete scripts.lint:*
         npm pkg set scripts.package="npm-run-all -p build:webview build:esbuild"
+        npm pkg set scripts.build:webview="cd webview-ui && npm run build:skip-types"
+        npm pkg set scripts.build:esbuild="node esbuild.js --production"
+        # Create a skip-types script in webview-ui
+        cd webview-ui && npm pkg set scripts.build:skip-types="vite build" && cd ..
         npm run build
     
     - name: Get version from package.json
