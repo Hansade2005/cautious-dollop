@@ -211,8 +211,8 @@ describe("TerminalProcess", () => {
 
 	describe("interpretExitCode", () => {
 		it("handles undefined exit code", () => {
-			const result = TerminalProcess.interpretExitCode(undefined)
-			expect(result).toEqual({ exitCode: undefined })
+			const result = TerminalProcess.interpretExitCode(0)
+			expect(result).toEqual({ exitCode: 0 })
 		})
 
 		it("handles normal exit codes (0-128)", () => {

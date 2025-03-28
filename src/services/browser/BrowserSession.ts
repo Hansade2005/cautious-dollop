@@ -16,6 +16,9 @@ interface PCRStats {
 	folderPath: string;
 	revision: string;
 	product: string;
+	puppeteer: {
+		launch: typeof launch;
+	};
 }
 
 export class BrowserSession {
@@ -47,7 +50,8 @@ export class BrowserSession {
 				executablePath: stats.executablePath,
 				folderPath: stats.folderPath,
 				revision: stats.revision,
-				product: stats.product
+				product: stats.product,
+				puppeteer: { launch: stats.puppeteer.launch },
 			}
 			// ... rest of initialization
 		}

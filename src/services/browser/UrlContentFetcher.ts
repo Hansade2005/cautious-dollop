@@ -9,8 +9,13 @@ import PCR from "puppeteer-chromium-resolver"
 import { fileExistsAtPath } from "../../utils/fs"
 
 interface PCRStats {
-	puppeteer: { launch: typeof launch }
-	executablePath: string
+	executablePath: string;
+	folderPath: string;
+	revision: string;
+	product: string;
+	puppeteer: {
+		launch: typeof launch;
+	};
 }
 
 export class UrlContentFetcher {

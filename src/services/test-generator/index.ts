@@ -4,6 +4,7 @@ import generate from '@babel/generator';
 import * as t from '@babel/types';
 import { readFileSync } from 'fs';
 import * as path from 'path';
+import { Node } from '@babel/types';
 
 interface TestCase {
   name: string;

@@ -102,21 +102,7 @@ export type McpToolCallResponse = {
 	isError?: boolean
 }
 
-export interface McpHub {
-	connections: McpConnection[]
-	isConnecting: boolean
-	getServers(): McpServer[]
-	getAllServers(): McpServer[]
-	getMcpServersPath(): Promise<string>
-	getMcpSettingsFilePath(): Promise<string>
-	toggleServerDisabled(serverName: string, disabled: boolean, source?: "global" | "project"): Promise<void>
-	updateServerTimeout(serverName: string, timeout: number, source?: "global" | "project"): Promise<void>
-	deleteServer(serverName: string, source?: "global" | "project"): Promise<void>
-	readResource(serverName: string, uri: string, source?: "global" | "project"): Promise<McpResourceResponse>
-	callTool(serverName: string, toolName: string, toolArguments?: Record<string, unknown>, source?: "global" | "project"): Promise<McpToolCallResponse>
-	toggleToolAlwaysAllow(serverName: string, source: "global" | "project", toolName: string, shouldAllow: boolean): Promise<void>
-	dispose(): Promise<void>
-}
+export type { McpHub } from '../services/mcp/McpHub';
 
 export interface McpConnection {
 	server: McpServer
