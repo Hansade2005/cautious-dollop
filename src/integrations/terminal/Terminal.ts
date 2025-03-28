@@ -30,15 +30,13 @@ public cmdCounter: number = 0
 public completedProcesses: TerminalProcess[] = []
 private initialCwd: string
 
-constructor(id: number, cwd: string) {
+constructor(id: number, terminal: vscode.Terminal, cwd: string) {
 this.id = id
 this.busy = false
 this.running = false
 this.streamClosed = false
 this.initialCwd = cwd
-
-// Create terminal with platform-specific shell
-this.terminal = Terminal.shellManager.createTerminal(`Terminal ${id}`);
+this.terminal = terminal
 
 // Set shell integration timeout based on platform
 Terminal.shellIntegrationTimeout = Terminal.shellManager.getShellIntegrationTimeout();

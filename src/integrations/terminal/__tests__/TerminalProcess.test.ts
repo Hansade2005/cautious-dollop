@@ -5,6 +5,7 @@ import * as vscode from "vscode"
 import { TerminalProcess, mergePromise } from "../TerminalProcess"
 import { Terminal } from "../Terminal"
 import { TerminalRegistry } from "../TerminalRegistry"
+import { ExitCodeDetails } from '../TerminalProcess'
 
 // Mock vscode.window.createTerminal
 const mockCreateTerminal = jest.fn()
@@ -45,11 +46,11 @@ describe("TerminalProcess", () => {
 			shellIntegration: {
 				executeCommand: jest.fn(),
 			},
-			name: "Roo Code",
-			processId: Promise.resolve(123),
+			name: "Test Terminal",
+			processId: Promise.resolve(1),
 			creationOptions: {},
 			exitStatus: undefined,
-			state: { isInteractedWith: true },
+			state: { isInteractedWith: false },
 			dispose: jest.fn(),
 			hide: jest.fn(),
 			show: jest.fn(),
@@ -62,7 +63,7 @@ describe("TerminalProcess", () => {
 			}
 		>
 
-		mockTerminalInfo = new Terminal(1, mockTerminal, "./")
+		mockTerminalInfo = new Terminal(1, mockTerminal, "/test/path")
 
 		// Create a process for testing
 		terminalProcess = new TerminalProcess(mockTerminalInfo)
@@ -269,6 +270,61 @@ describe("TerminalProcess", () => {
 			expect(merged instanceof TerminalProcess).toBe(true)
 
 			await expect(merged).resolves.toBeUndefined()
+		})
+	})
+
+	describe("output handling", () => {
+		it("should handle output correctly", () => {
+			const output = "test output"
+			terminalProcess.addOutput(output)
+			expect(terminalProcess.hasUnretrievedOutput()).toBe(true)
+			expect(terminalProcess.getUnretrievedOutput()).toBe(output)
+			expect(terminalProcess.hasUnretrievedOutput()).toBe(false)
+		})
+	})
+
+	describe("event handling", () => {
+		it("should emit continue event", () => {
+			const listener = jest.fn()
+			terminalProcess.on("continue", listener)
+			terminalProcess.continue()
+			expect(listener).toHaveBeenCalled()
+		})
+
+		it("should handle line events", () => {
+			const line = "test line"
+			const listener = jest.fn()
+			terminalProcess.on("line", listener)
+			terminalProcess.emit("line", line)
+			expect(listener).toHaveBeenCalledWith(line)
+		})
+	})
+
+	describe("state management", () => {
+		it("should manage listening state", () => {
+			expect(terminalProcess.getIsListening()).toBe(false)
+			terminalProcess.setIsListening(true)
+			expect(terminalProcess.getIsListening()).toBe(true)
+		})
+
+		it("should manage output tracking", () => {
+			expect(terminalProcess.getLastRetrievedIndex()).toBe(0)
+			terminalProcess.setLastRetrievedIndex(5)
+			expect(terminalProcess.getLastRetrievedIndex()).toBe(5)
+		})
+	})
+
+	describe("exit code interpretation", () => {
+		it("should interpret exit codes correctly", () => {
+			const code = 0
+			const signal = "SIGTERM"
+			const coreDumpPossible = true
+			const result = TerminalProcess.interpretExitCode(code, signal, coreDumpPossible)
+			expect(result).toEqual({
+				exitCode: code,
+				signalName: signal,
+				coreDumpPossible: coreDumpPossible
+			})
 		})
 	})
 })

@@ -27,7 +27,9 @@ interface TestGenerationResult {
   functionsCovered: FunctionMetadata[];
 }
 
-function inferTestCases(functionNode: t.FunctionDeclaration | t.ArrowFunctionExpression): TestCase[] {
+type FunctionNode = t.FunctionDeclaration | t.ArrowFunctionExpression;
+
+function inferTestCases(functionNode: FunctionNode): TestCase[] {
   const tests: TestCase[] = [];
   
   // Basic test case - null check
@@ -45,7 +47,13 @@ function inferTestCases(functionNode: t.FunctionDeclaration | t.ArrowFunctionExp
   });
   
   // Analyze function body for conditional branches
-  traverse(t.file(t.program([functionNode])), {
+  const ast = t.file(t.program([t.isFunctionDeclaration(functionNode) ? functionNode : t.functionDeclaration(
+    t.identifier('temp'),
+    functionNode.params,
+    functionNode.body
+  )]));
+  
+  traverse(ast, {
     IfStatement(path) {
       const condition = path.node.test;
       if (t.isBinaryExpression(condition)) {

@@ -114,25 +114,25 @@ async function testTerminalCommand(
 	command: string,
 	expectedOutput: string,
 ): Promise<{ executionTimeUs: number; capturedOutput: string; exitDetails: ExitCodeDetails }> {
-	let startTime: bigint = BigInt(0)
-	let endTime: bigint = BigInt(0)
+	let startTime: bigint
+	let endTime: bigint
 	let timeRecorded = false
-	// Create a mock terminal with shell integration
+
+	// Create mock terminal
 	const mockTerminal = {
-		shellIntegration: {
-			executeCommand: jest.fn(),
-			cwd: vscode.Uri.file("/test/path"),
-		},
-		name: "Roo Code",
-		processId: Promise.resolve(123),
+		name: "Test Terminal",
+		processId: Promise.resolve(1),
 		creationOptions: {},
 		exitStatus: undefined,
-		state: { isInteractedWith: true },
+		state: { isInteractedWith: false },
 		dispose: jest.fn(),
 		hide: jest.fn(),
 		show: jest.fn(),
 		sendText: jest.fn(),
-	}
+		shellIntegration: {
+			executeCommand: jest.fn(),
+		},
+	} as any
 
 	// Create terminal info with running state
 	const mockTerminalInfo = new Terminal(1, mockTerminal, "/test/path")
@@ -178,14 +178,11 @@ async function testTerminalCommand(
 		// Set the process on the terminal
 		mockTerminalInfo.process = terminalProcess
 
-		// Run the command (now handled by constructor)
-		// We've already created the process, so we'll trigger the events manually
+		// Run the command
+		terminalProcess.run(command)
 
 		// Get the event handlers from the mock
 		const eventHandlers = (vscode as any).__eventHandlers
-
-		// Execute the command first to set up the process
-		terminalProcess.run(command)
 
 		// Trigger the start terminal shell execution event through VSCode mock
 		if (eventHandlers.startTerminalShellExecution) {
@@ -223,6 +220,7 @@ async function testTerminalCommand(
 
 		// Wait for the command to complete or timeout
 		await Promise.race([completedPromise, timeoutPromise])
+
 		// Calculate execution time in microseconds
 		// If endTime wasn't set (unlikely but possible), set it now
 		if (!timeRecorded) {

@@ -23,6 +23,19 @@ import { Mode, ModeConfig, getModeConfig, isToolAllowedForMode, getGroupName } f
 import { ToolName, TOOL_GROUPS, ALWAYS_AVAILABLE_TOOLS } from "../../../shared/tool-groups"
 import { ToolArgs } from "./types"
 
+type GroupEntry = 
+	| "read" 
+	| "edit" 
+	| "browser" 
+	| "command" 
+	| "mcp" 
+	| "modes" 
+	| ["read" | "edit" | "browser" | "command" | "mcp" | "modes", { description?: string; fileRegex?: string }];
+
+function getGroupName(groupEntry: GroupEntry): string {
+	return Array.isArray(groupEntry) ? groupEntry[0] : groupEntry;
+}
+
 // Map of tool names to their description functions
 const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined> = {
 execute_command: (args) => getExecuteCommandDescription(args),
@@ -70,7 +83,7 @@ export function getToolDescriptionsForMode(
 	const tools = new Set<string>()
 
 	// Add tools from mode's groups
-	config.groups.forEach((groupEntry: string | [string, any]) => {
+	config.groups.forEach((groupEntry: GroupEntry) => {
 		const groupName = getGroupName(groupEntry)
 		const toolGroup = TOOL_GROUPS[groupName]
 		if (toolGroup) {

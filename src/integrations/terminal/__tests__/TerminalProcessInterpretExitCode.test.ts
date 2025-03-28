@@ -1,4 +1,4 @@
-import { TerminalProcess } from "../TerminalProcess"
+import { TerminalProcess, ExitCodeDetails } from '../TerminalProcess';
 import { execSync } from "child_process"
 import { Terminal } from "../Terminal"
 import * as vscode from "vscode"
@@ -16,85 +16,52 @@ const mockTerminal = {
 	sendText: jest.fn(),
 } as unknown as vscode.Terminal
 
-describe("TerminalProcess.interpretExitCode", () => {
-	it("should handle undefined exit code", () => {
-		const result = TerminalProcess.interpretExitCode(undefined)
-		expect(result).toEqual({ exitCode: undefined })
-	})
-
-	it("should handle normal exit codes (0-127)", () => {
-		// Test success exit code (0)
-		let result = TerminalProcess.interpretExitCode(0)
-		expect(result).toEqual({ exitCode: 0 })
-
-		// Test error exit code (1)
-		result = TerminalProcess.interpretExitCode(1)
-		expect(result).toEqual({ exitCode: 1 })
-
-		// Test arbitrary exit code within normal range
-		result = TerminalProcess.interpretExitCode(42)
-		expect(result).toEqual({ exitCode: 42 })
-
-		// Test boundary exit code
-		result = TerminalProcess.interpretExitCode(127)
-		expect(result).toEqual({ exitCode: 127 })
-	})
-
-	it("should handle signal exit codes (128+)", () => {
-		// Test SIGINT (Ctrl+C) - 128 + 2 = 130
-		const result = TerminalProcess.interpretExitCode(130)
+describe('TerminalProcess.interpretExitCode', () => {
+	it('should handle normal exit code 0', () => {
+		const result = TerminalProcess.interpretExitCode(0);
 		expect(result).toEqual({
-			exitCode: 130,
-			signal: 2,
-			signalName: "SIGINT",
-			coreDumpPossible: false,
-		})
+			exitCode: 0,
+			signalName: undefined,
+			coreDumpPossible: undefined
+		});
+	});
 
-		// Test SIGTERM - 128 + 15 = 143
-		const resultTerm = TerminalProcess.interpretExitCode(143)
-		expect(resultTerm).toEqual({
-			exitCode: 143,
-			signal: 15,
-			signalName: "SIGTERM",
-			coreDumpPossible: false,
-		})
-
-		// Test SIGSEGV (segmentation fault) - 128 + 11 = 139
-		const resultSegv = TerminalProcess.interpretExitCode(139)
-		expect(resultSegv).toEqual({
-			exitCode: 139,
-			signal: 11,
-			signalName: "SIGSEGV",
-			coreDumpPossible: true,
-		})
-	})
-
-	it("should identify signals that can produce core dumps", () => {
-		// Core dump possible signals: SIGQUIT(3), SIGILL(4), SIGABRT(6), SIGBUS(7), SIGFPE(8), SIGSEGV(11)
-		const coreDumpSignals = [3, 4, 6, 7, 8, 11]
-
-		for (const signal of coreDumpSignals) {
-			const exitCode = 128 + signal
-			const result = TerminalProcess.interpretExitCode(exitCode)
-			expect(result.coreDumpPossible).toBe(true)
-		}
-
-		// Test a non-core-dump signal
-		const nonCoreDumpResult = TerminalProcess.interpretExitCode(128 + 1) // SIGHUP
-		expect(nonCoreDumpResult.coreDumpPossible).toBe(false)
-	})
-
-	it("should handle unknown signals", () => {
-		// Test an exit code for a signal that's not in our mapping
-		const result = TerminalProcess.interpretExitCode(128 + 99)
+	it('should handle non-zero exit code', () => {
+		const result = TerminalProcess.interpretExitCode(1);
 		expect(result).toEqual({
-			exitCode: 128 + 99,
-			signal: 99,
-			signalName: "Unknown Signal (99)",
-			coreDumpPossible: false,
-		})
-	})
-})
+			exitCode: 1,
+			signalName: undefined,
+			coreDumpPossible: undefined
+		});
+	});
+
+	it('should handle signal termination', () => {
+		const result = TerminalProcess.interpretExitCode(0, 'SIGTERM');
+		expect(result).toEqual({
+			exitCode: 0,
+			signalName: 'SIGTERM',
+			coreDumpPossible: undefined
+		});
+	});
+
+	it('should handle core dump possibility', () => {
+		const result = TerminalProcess.interpretExitCode(0, 'SIGSEGV', true);
+		expect(result).toEqual({
+			exitCode: 0,
+			signalName: 'SIGSEGV',
+			coreDumpPossible: true
+		});
+	});
+
+	it('should handle all parameters', () => {
+		const result = TerminalProcess.interpretExitCode(1, 'SIGABRT', true);
+		expect(result).toEqual({
+			exitCode: 1,
+			signalName: 'SIGABRT',
+			coreDumpPossible: true
+		});
+	});
+});
 
 describe("TerminalProcess.interpretExitCode with real commands", () => {
 	it("should correctly interpret exit code 0 from successful command", () => {

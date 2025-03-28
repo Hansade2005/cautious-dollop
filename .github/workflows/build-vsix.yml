@@ -4,6 +4,14 @@ on:
   push:
     tags:
       - 'v*' # Trigger on version tags
+  workflow_dispatch: # Allow manual triggering
+  pull_request: # Optionally trigger on pull requests
+    branches:
+      - main
+      - master
+
+env:
+  NODE_VERSION: '20.18.1'
 
 jobs:
   build:
@@ -15,24 +23,33 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20.18.1'
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
     
     - name: Install dependencies
-      run: npm run install:all
+      run: |
+        npm install -g vsce
+        npm run install:all
     
     - name: Build VSIX
       run: npm run build
     
-    - name: Get version from tag
+    - name: Get version from package.json
       id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/v')
       with:
         name: Release ${{ steps.get_version.outputs.VERSION }}
         files: |
           bin/roo-cline-*.vsix
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload VSIX as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: vsix-package
+        path: bin/roo-cline-*.vsix

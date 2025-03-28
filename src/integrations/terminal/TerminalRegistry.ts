@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 import { arePathsEqual } from "../../utils/path"
 import { Terminal } from "./Terminal"
-import { TerminalProcess } from "./TerminalProcess"
+import { TerminalProcess, ExitCodeDetails } from "./TerminalProcess"
 
 // Although vscode.window.terminals provides a list of all open terminals, there's no way to know whether they're busy or not (exitStatus does not provide useful information for most commands). In order to prevent creating too many terminals, we need to keep track of terminals through the life of the extension, as well as session specific terminals for the life of a task (to get latest unretrieved output).
 // Since we have promises keeping track of terminal processes, we get the added benefit of keep track of busy terminals even after a task is closed.
@@ -249,11 +249,11 @@ export class TerminalRegistry {
 
 			// If busy is undefined, return all background terminals
 			if (busy === undefined) {
-				return t.getProcessesWithOutput().length > 0 || t.process?.hasUnretrievedOutput()
-			} else {
-				// Filter by busy state
-				return t.busy === busy
+				return true
 			}
+
+			// Filter by busy state
+			return t.running === busy
 		})
 	}
 
