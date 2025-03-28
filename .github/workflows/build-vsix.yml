@@ -30,6 +30,11 @@ jobs:
       run: |
         npm install -g vsce
         npm run install:all
+        
+    - name: Setup tree-sitter
+      run: |
+        mkdir -p dist
+        cp node_modules/web-tree-sitter/tree-sitter.wasm dist/
     
     - name: Build VSIX
       run: npm run build
