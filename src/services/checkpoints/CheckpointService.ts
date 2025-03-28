@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import { isWindows, isMacOS, normalizePath, handlePlatformSpecificIssues } from '../../shared/checkpoints'
 import * as path from 'path'
 import * as fs from 'fs'
-import { telemetryService } from "../telemetry/TelemetryService"
+import { telemetryService } from '../telemetry/TelemetryService'
 
 export class CheckpointService {
   private static instance: CheckpointService

@@ -27,9 +27,7 @@ interface TestGenerationResult {
   functionsCovered: FunctionMetadata[];
 }
 
-type FunctionNode = t.FunctionDeclaration | t.ArrowFunctionExpression;
-
-function inferTestCases(functionNode: FunctionNode): TestCase[] {
+function inferTestCases(functionNode: t.FunctionDeclaration | t.ArrowFunctionExpression): TestCase[] {
   const tests: TestCase[] = [];
   
   // Basic test case - null check
@@ -47,11 +45,13 @@ function inferTestCases(functionNode: FunctionNode): TestCase[] {
   });
   
   // Analyze function body for conditional branches
-  const ast = t.file(t.program([t.isFunctionDeclaration(functionNode) ? functionNode : t.functionDeclaration(
+  const wrappedNode = t.isFunctionDeclaration(functionNode) ? functionNode : t.functionDeclaration(
     t.identifier('temp'),
     functionNode.params,
-    functionNode.body
-  )]));
+    t.isBlockStatement(functionNode.body) ? functionNode.body : t.blockStatement([t.returnStatement(functionNode.body)])
+  );
+  
+  const ast = t.file(t.program([wrappedNode]));
   
   traverse(ast, {
     IfStatement(path) {
@@ -97,14 +97,10 @@ function generateTestCode(filePath: string, framework: 'jest' | 'mocha' = 'jest'
     ArrowFunctionExpression(path) {
       const node = path.node;
       const parentVariableDeclarator = path.findParent(p => p.isVariableDeclarator());
-      if (!parentVariableDeclarator) return;
-      
-      const name = t.isIdentifier(parentVariableDeclarator.node.id) 
-        ? parentVariableDeclarator.node.id.name 
-        : 'anonymous';
+      if (!parentVariableDeclarator || !t.isIdentifier(parentVariableDeclarator.node.id)) return;
       
       const metadata: FunctionMetadata = {
-        name,
+        name: parentVariableDeclarator.node.id.name,
         params: node.params.map(param => generate(param).code),
         async: node.async,
         tests: inferTestCases(node)

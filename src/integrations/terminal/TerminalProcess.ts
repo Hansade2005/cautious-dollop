@@ -35,15 +35,15 @@ export interface TerminalProcessResultPromise extends Promise<void> {
 
 export class TerminalProcess extends EventEmitter {
   // Add strongly typed event methods
-  public emit<K extends keyof TerminalEvents>(event: K, ...args: Parameters<TerminalEvents[K]>): boolean {
+  public override emit<K extends keyof TerminalEvents>(event: K | string, ...args: any[]): boolean {
     return super.emit(event, ...args);
   }
 
-  public on<K extends keyof TerminalEvents>(event: K, listener: TerminalEvents[K]): this {
+  public override on<K extends keyof TerminalEvents>(event: K | string, listener: (...args: any[]) => void): this {
     return super.on(event, listener);
   }
 
-  public once<K extends keyof TerminalEvents>(event: K, listener: TerminalEvents[K]): this {
+  public override once<K extends keyof TerminalEvents>(event: K | string, listener: (...args: any[]) => void): this {
     return super.once(event, listener);
   }
 

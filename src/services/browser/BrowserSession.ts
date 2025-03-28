@@ -12,8 +12,10 @@ import { BrowserActionResult } from "../../shared/ExtensionMessage"
 import { discoverChromeInstances, testBrowserConnection } from "./browserDiscovery"
 
 interface PCRStats {
-	puppeteer: { launch: typeof launch }
-	executablePath: string
+	executablePath: string;
+	folderPath: string;
+	revision: string;
+	product: string;
 }
 
 export class BrowserSession {
@@ -23,9 +25,31 @@ export class BrowserSession {
 	private currentMousePosition?: string
 	private cachedWebSocketEndpoint?: string
 	private lastConnectionAttempt: number = 0
+	private static instance: BrowserSession
+	private stats: PCRStats | null = null
 
-	constructor(context: vscode.ExtensionContext) {
+	private constructor(context: vscode.ExtensionContext) {
 		this.context = context
+	}
+
+	public static getInstance(context: vscode.ExtensionContext): BrowserSession {
+		if (!BrowserSession.instance) {
+			BrowserSession.instance = new BrowserSession(context)
+		}
+		return BrowserSession.instance
+	}
+
+	public async initialize(): Promise<void> {
+		if (!this.browser) {
+			const stats = await PCR()
+			this.stats = {
+				executablePath: stats.executablePath,
+				folderPath: stats.folderPath,
+				revision: stats.revision,
+				product: stats.product
+			}
+			// ... rest of initialization
+		}
 	}
 
 	/**

@@ -17,32 +17,34 @@ import { getUseMcpToolDescription } from "./use-mcp-tool"
 import { getAccessMcpResourceDescription } from "./access-mcp-resource"
 import { getSwitchModeDescription } from "./switch-mode"
 import { getNewTaskDescription } from "./new-task"
-import { DiffStrategy } from "../../diff/DiffStrategy"
-import { McpHub } from "../../../services/mcp/McpHub"
+import { DiffStrategy } from "../../../shared/diff"
+import { McpHub } from "../../../shared/mcp"
 import { Mode, ModeConfig, getModeConfig, isToolAllowedForMode, getGroupName } from "../../../shared/modes"
 import { ToolName, TOOL_GROUPS, ALWAYS_AVAILABLE_TOOLS } from "../../../shared/tool-groups"
 import { ToolArgs } from "./types"
 
-type GroupEntry = 
-	| "read" 
-	| "edit" 
-	| "browser" 
-	| "command" 
-	| "mcp" 
-	| "modes" 
-	| ["read" | "edit" | "browser" | "command" | "mcp" | "modes", { description?: string; fileRegex?: string }];
+interface ToolGroupConfig {
+	tools: string[];
+	description?: string;
+}
 
-function getGroupName(groupEntry: GroupEntry): string {
+type ValidGroupName = "read" | "edit" | "browser" | "command" | "mcp" | "modes";
+
+type GroupEntry = 
+	| ValidGroupName
+	| [ValidGroupName, { description?: string; fileRegex?: string }];
+
+function getGroupNameInternal(groupEntry: GroupEntry): ValidGroupName {
 	return Array.isArray(groupEntry) ? groupEntry[0] : groupEntry;
 }
 
 // Map of tool names to their description functions
 const toolDescriptionMap: Record<string, (args: ToolArgs) => string | undefined> = {
-execute_command: (args) => getExecuteCommandDescription(args),
-read_file: (args) => getReadFileDescription(args),
-example_tool: (args) => getExampleToolDescription(args),
-web_search: (args) => getWebSearchDescription(args),
-generate_tests: (args) => getGenerateTestsDescription(args),
+	execute_command: (args) => getExecuteCommandDescription(args),
+	read_file: (args) => getReadFileDescription(args),
+	example_tool: (args) => getExampleToolDescription(args),
+	web_search: (args) => getWebSearchDescription(args),
+	generate_tests: (args) => getGenerateTestsDescription(args),
 	fetch_instructions: () => getFetchInstructionsDescription(),
 	write_to_file: (args) => getWriteToFileDescription(args),
 	search_files: (args) => getSearchFilesDescription(args),
@@ -84,10 +86,10 @@ export function getToolDescriptionsForMode(
 
 	// Add tools from mode's groups
 	config.groups.forEach((groupEntry: GroupEntry) => {
-		const groupName = getGroupName(groupEntry)
+		const groupName = getGroupNameInternal(groupEntry)
 		const toolGroup = TOOL_GROUPS[groupName]
 		if (toolGroup) {
-			toolGroup.tools.forEach((tool) => {
+			toolGroup.tools.forEach((tool: string) => {
 				if (isToolAllowedForMode(tool as ToolName, mode, customModes ?? [], experiments ?? {})) {
 					tools.add(tool)
 				}
@@ -116,13 +118,13 @@ export function getToolDescriptionsForMode(
 
 // Export individual description functions for backward compatibility
 export {
-getExecuteCommandDescription,
-getReadFileDescription,
-getExampleToolDescription,
-getWebSearchDescription,
-handleWebSearch,
-getGenerateTestsDescription,
-handleGenerateTests,
+	getExecuteCommandDescription,
+	getReadFileDescription,
+	getExampleToolDescription,
+	getWebSearchDescription,
+	handleWebSearch,
+	getGenerateTestsDescription,
+	handleGenerateTests,
 	getFetchInstructionsDescription,
 	getWriteToFileDescription,
 	getSearchFilesDescription,

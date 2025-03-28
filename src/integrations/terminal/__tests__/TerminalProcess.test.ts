@@ -311,6 +311,7 @@ describe("TerminalProcess", () => {
 			expect(terminalProcess.getLastRetrievedIndex()).toBe(0)
 			terminalProcess.setLastRetrievedIndex(5)
 			expect(terminalProcess.getLastRetrievedIndex()).toBe(5)
+			expect(terminalProcess.getFullOutput()).toEqual([])
 		})
 	})
 

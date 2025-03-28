@@ -114,8 +114,8 @@ async function testTerminalCommand(
 	command: string,
 	expectedOutput: string,
 ): Promise<{ executionTimeUs: number; capturedOutput: string; exitDetails: ExitCodeDetails }> {
-	let startTime: bigint
-	let endTime: bigint
+	let startTime: bigint = process.hrtime.bigint()
+	let endTime: bigint = startTime
 	let timeRecorded = false
 
 	// Create mock terminal
@@ -142,7 +142,6 @@ async function testTerminalCommand(
 	TerminalRegistry["terminals"] = [mockTerminalInfo]
 
 	// Create a new terminal process for testing
-	startTime = process.hrtime.bigint() // Start timing from terminal process creation
 	const terminalProcess = new TerminalProcess(mockTerminalInfo)
 
 	try {
