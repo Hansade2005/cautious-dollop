@@ -32,7 +32,7 @@ export const CodeBlock: FC<CodeBlockProps> = memo(({ language, value, className,
 					transformers: [
 						{
 							pre(node) {
-								node.properties.class = cn(className, "overflow-x-auto code-block")
+								node.properties.class = cn(className, "overflow-x-auto")
 								return node
 							},
 							code(node) {

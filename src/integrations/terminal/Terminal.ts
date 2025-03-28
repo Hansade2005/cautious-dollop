@@ -4,9 +4,20 @@ import { ExitCodeDetails, mergePromise, TerminalProcess, TerminalProcessResultPr
 import { truncateOutput, applyRunLengthEncoding } from "../misc/extract-text"
 import { ShellManager } from "../../services/shell-manager"
 
+// Export timeout constant
+export const TERMINAL_SHELL_INTEGRATION_TIMEOUT = 10000;
+
 export class Terminal {
 private static shellManager = ShellManager.getInstance();
-private static shellIntegrationTimeout: number;
+private static shellIntegrationTimeout: number = TERMINAL_SHELL_INTEGRATION_TIMEOUT;
+
+public static getShellIntegrationTimeout(): number {
+    return Terminal.shellIntegrationTimeout;
+}
+
+public static setShellIntegrationTimeout(timeout: number): void {
+    Terminal.shellIntegrationTimeout = timeout;
+}
 
 public terminal: vscode.Terminal
 public busy: boolean
