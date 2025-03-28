@@ -1,5 +1,5 @@
 import * as parser from '@babel/parser';
-import traverse from '@babel/traverse';
+import traverse, { NodePath } from '@babel/traverse';
 import generate from '@babel/generator';
 import * as t from '@babel/types';
 import { readFileSync } from 'fs';
@@ -83,11 +83,11 @@ function generateTestCode(filePath: string, framework: 'jest' | 'mocha' = 'jest'
   traverse(ast, {
     ArrowFunctionExpression(path) {
       const node = path.node as t.ArrowFunctionExpression;
-      const parentVariableDeclarator = path.findParent(p => p.isVariableDeclarator()) as traverse.NodePath<VariableDeclarator>;
+      const parentVariableDeclarator = path.findParent(p => p.isVariableDeclarator()) as NodePath<t.VariableDeclarator>;
       if (!parentVariableDeclarator || !t.isIdentifier(parentVariableDeclarator.node.id)) return;
       
       const metadata: FunctionMetadata = {
-        name: (parentVariableDeclarator.node.id as Identifier).name,
+        name: (parentVariableDeclarator.node.id as t.Identifier).name,
         params: node.params.map(param => generate(param).code),
         async: node.async,
         tests: inferTestCases(node)
